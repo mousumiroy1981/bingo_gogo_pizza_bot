@@ -5,11 +5,11 @@ from groq import Groq
 st.set_page_config(page_title="Bingo & Gogo Pizza Bot", page_icon="🍕")
 st.title("🍕 Bingo & Gogo Pizza Assistant")
 
-# Safely fetch API key from secrets or environment
+# Retrieve API key securely from Streamlit secrets or environment
 api_key = st.secrets.get("GROQ_API_KEY", os.environ.get("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"))
 
 if not api_key:
-    st.error("⚠️ GROQ_API_KEY is missing! Please add it to your Streamlit App Secrets.")
+    st.error("⚠️ GROQ_API_KEY is missing! Please add it to Streamlit App Secrets.")
     st.stop()
 
 client = Groq(api_key=api_key)
@@ -37,14 +37,17 @@ RULES:
 3. Refuse any questions unrelated to Bingo & Gogo Pizza.
 """
 
+# Initialize chat session history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Display previous messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-if prompt := st.chat_input("Ask about menu, hours, or delivery..."):
+# User prompt input
+if prompt := st.chat_input("Ask about our menu, hours, or delivery..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -52,16 +55,14 @@ if prompt := st.chat_input("Ask about menu, hours, or delivery..."):
     api_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages
 
     try:
-        # Change from "llama-3.3-70b-versatile" or "llama-3.1-8b-instant"
-response = client.chat.completions.create(
-    model="openai/gpt-oss-20b",
-    messages=api_messages,
-    temperature=0.1
-)
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=api_messages,
+            temperature=0.1
+        )
         reply = response.choices[0].message.content
         st.session_state.messages.append({"role": "assistant", "content": reply})
         with st.chat_message("assistant"):
             st.markdown(reply)
-            
     except Exception as e:
-        st.error(f"Error connecting to Groq: {e}")
+        st.error(f"Error connecting to Groq API: {e}")
