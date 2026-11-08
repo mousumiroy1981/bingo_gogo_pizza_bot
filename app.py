@@ -5,8 +5,13 @@ from groq import Groq
 st.set_page_config(page_title="Bingo & Gogo Pizza Bot", page_icon="🍕")
 st.title("🍕 Bingo & Gogo Pizza Assistant")
 
-# Retrieve API key securely from Streamlit secrets
+# Safely fetch API key from secrets or environment
 api_key = st.secrets.get("GROQ_API_KEY", os.environ.get("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"))
+
+if not api_key:
+    st.error("⚠️ GROQ_API_KEY is missing! Please add it to your Streamlit App Secrets.")
+    st.stop()
+
 client = Groq(api_key=api_key)
 
 KNOWLEDGE_BASE = """
@@ -35,26 +40,27 @@ RULES:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Render chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User prompt input
-if prompt := st.chat_input("Ask about our menu, hours, or delivery..."):
+if prompt := st.chat_input("Ask about menu, hours, or delivery..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     api_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages
-    
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=api_messages,
-        temperature=0.1
-    )
-    reply = response.choices[0].message.content
-    
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    with st.chat_message("assistant"):
-        st.markdown(reply)
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",  # Standard fast model ID
+            messages=api_messages,
+            temperature=0.1
+        )
+        reply = response.choices[0].message.content
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+        with st.chat_message("assistant"):
+            st.markdown(reply)
+            
+    except Exception as e:
+        st.error(f"Error connecting to Groq: {e}")
