@@ -53,7 +53,7 @@ if prompt := st.chat_input("Ask about menu, hours, or delivery..."):
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",  # Standard fast model ID
+            model="llama-3.3-70b-versatile",  # Standard fast model ID
             messages=api_messages,
             temperature=0.1
         )
