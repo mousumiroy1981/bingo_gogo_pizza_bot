@@ -52,11 +52,12 @@ if prompt := st.chat_input("Ask about menu, hours, or delivery..."):
     api_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages
 
     try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  # Standard fast model ID
-            messages=api_messages,
-            temperature=0.1
-        )
+        # Change from "llama-3.3-70b-versatile" or "llama-3.1-8b-instant"
+response = client.chat.completions.create(
+    model="openai/gpt-oss-20b",
+    messages=api_messages,
+    temperature=0.1
+)
         reply = response.choices[0].message.content
         st.session_state.messages.append({"role": "assistant", "content": reply})
         with st.chat_message("assistant"):
