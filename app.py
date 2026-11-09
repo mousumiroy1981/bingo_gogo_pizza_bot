@@ -2,7 +2,7 @@ import os
 import streamlit as st
 from groq import Groq
 
-st.set_page_config(page_title="Bingo & Gogo Pizza Bot", page_icon="🍕")
+st.set_page_config(page_title="Bingo & Gogo Pizza Bot", page_icon="🍕", layout="wide")
 st.title("🍕 Bingo & Gogo Pizza Assistant")
 
 # Fetch API key
@@ -14,33 +14,51 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 
-# Function to automatically read and merge all 3 Markdown files
+# Get the exact directory where app.py resides
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_knowledge_base():
     files = ["menu.md", "operations.md", "policies.md"]
     combined_text = ""
+    status_report = []
     
     for filename in files:
-        if os.path.exists(filename):
-            with open(filename, "r", encoding="utf-8") as file:
-                combined_text += file.read() + "\n\n"
+        # Construct absolute path to prevent container working directory mismatches
+        filepath = os.path.join(BASE_DIR, filename)
+        
+        if os.path.exists(filepath):
+            with open(filepath, "r", encoding="utf-8") as file:
+                content = file.read()
+                combined_text += f"\n\n--- DOCUMENT: {filename} ---\n{content}"
+                status_report.append(f"✅ Loaded {filename} ({len(content)} bytes)")
         else:
-            combined_text += f"\n[Warning: {filename} missing]\n"
+            combined_text += f"\n\n[WARNING: {filename} NOT FOUND]"
+            status_report.append(f"❌ Missing {filename}")
             
-    return combined_text
+    return combined_text, status_report
 
-KNOWLEDGE_BASE = load_knowledge_base()
+KNOWLEDGE_BASE, FILE_STATUS = load_knowledge_base()
+
+# Sidebar for instant debugging
+with st.sidebar:
+    st.header("⚙️ Bot Diagnostics")
+    st.subheader("File Status:")
+    for status in FILE_STATUS:
+        st.write(status)
+    
+    with st.expander("View Full Loaded Knowledge Base"):
+        st.text_area("Context Sent to LLM", KNOWLEDGE_BASE, height=300)
 
 SYSTEM_PROMPT = f"""
-You are the official AI Assistant for Bingo & Gogo Pizza.
+You are the helpful AI Assistant for Bingo & Gogo Pizza.
 
-CONTEXT:
+CONTEXT DATA:
 {KNOWLEDGE_BASE}
 
-RULES:
-1. Answer strictly using ONLY the CONTEXT information provided above.
-2. If an answer cannot be found in the context, say: "I don't have that detail right now. Please call us directly at (555) 839-7499."
-3. Do not invent prices, hours, or items not listed in the context.
-4. Refuse questions unrelated to Bingo & Gogo Pizza politely.
+INSTRUCTIONS:
+1. Use the CONTEXT DATA above to answer user questions thoroughly.
+2. If the user asks a question about Bingo & Gogo Pizza that is NOT in the context data, respond: "I don't have that specific detail right now. Please call us directly at (555) 839-7499."
+3. If the user greets you or asks general conversational questions related to ordering pizza, respond warmly and guide them to the menu.
 """
 
 if "messages" not in st.session_state:
@@ -61,7 +79,7 @@ if prompt := st.chat_input("Ask about our menu, hours, or policies..."):
         response = client.chat.completions.create(
             model="openai/gpt-oss-20b",
             messages=api_messages,
-            temperature=0.1
+            temperature=0.2
         )
         reply = response.choices[0].message.content
         st.session_state.messages.append({"role": "assistant", "content": reply})
