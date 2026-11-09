@@ -5,25 +5,30 @@ from groq import Groq
 st.set_page_config(page_title="Bingo & Gogo Pizza Bot", page_icon="🍕")
 st.title("🍕 Bingo & Gogo Pizza Assistant")
 
-# Retrieve API key securely from Streamlit secrets or environment
+# Fetch API key
 api_key = st.secrets.get("GROQ_API_KEY", os.environ.get("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"))
 
 if not api_key:
-    st.error("⚠️ GROQ_API_KEY is missing! Please add it to Streamlit App Secrets.")
+    st.error("⚠️ GROQ_API_KEY is missing! Please check Streamlit App Secrets.")
     st.stop()
 
 client = Groq(api_key=api_key)
 
-KNOWLEDGE_BASE = """
-Bingo & Gogo Pizza Knowledge Base:
-- Location: 742 Evergreen Terrace, Springfield, OR
-- Phone: (555) 839-7499
-- Hours: Mon-Thurs 11am-10pm, Fri-Sat 11am-11:30pm, Sun 12pm-9:30pm
-- Delivery: 5-mile radius. $15 minimum order. $3.99 fee (0-3 mi), $5.99 fee (3-5 mi).
-- Gluten-Free: Available in 10" Small crust (+ $3.00).
-- Halal: All chicken toppings (grilled chicken & wings) are Halal certified.
-- Top Pizza: The Bingo Supreme ($14.99 S / $19.99 M / $24.99 L).
-"""
+# Function to automatically read and merge all 3 Markdown files
+def load_knowledge_base():
+    files = ["menu.md", "operations.md", "policies.md"]
+    combined_text = ""
+    
+    for filename in files:
+        if os.path.exists(filename):
+            with open(filename, "r", encoding="utf-8") as file:
+                combined_text += file.read() + "\n\n"
+        else:
+            combined_text += f"\n[Warning: {filename} missing]\n"
+            
+    return combined_text
+
+KNOWLEDGE_BASE = load_knowledge_base()
 
 SYSTEM_PROMPT = f"""
 You are the official AI Assistant for Bingo & Gogo Pizza.
@@ -32,22 +37,20 @@ CONTEXT:
 {KNOWLEDGE_BASE}
 
 RULES:
-1. Answer ONLY using the CONTEXT above.
-2. If the answer is not in the context, say: "I don't have that detail. Please call us at (555) 839-7499."
-3. Refuse any questions unrelated to Bingo & Gogo Pizza.
+1. Answer strictly using ONLY the CONTEXT information provided above.
+2. If an answer cannot be found in the context, say: "I don't have that detail right now. Please call us directly at (555) 839-7499."
+3. Do not invent prices, hours, or items not listed in the context.
+4. Refuse questions unrelated to Bingo & Gogo Pizza politely.
 """
 
-# Initialize chat session history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display previous messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User prompt input
-if prompt := st.chat_input("Ask about our menu, hours, or delivery..."):
+if prompt := st.chat_input("Ask about our menu, hours, or policies..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -64,5 +67,6 @@ if prompt := st.chat_input("Ask about our menu, hours, or delivery..."):
         st.session_state.messages.append({"role": "assistant", "content": reply})
         with st.chat_message("assistant"):
             st.markdown(reply)
+            
     except Exception as e:
         st.error(f"Error connecting to Groq API: {e}")
