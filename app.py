@@ -32,7 +32,7 @@ POL_TEXT = open(pol_path, "r", encoding="utf-8").read() if os.path.exists(pol_pa
     "Separate preparation counters for Veg and Non-Veg pizzas. Orders can be canceled within 5 minutes."
 )
 
-# Strip Streamlit default padding & chrome for a full-screen website
+# Strip Streamlit default padding & chrome
 st.markdown("""
 <style>
     #MainMenu, header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
@@ -94,7 +94,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   .search-box input:focus { border-color: #C8102E; background: #FFF; }
   .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #777; }
 
-  .header-actions { display: flex; align-items: center; gap: 16px; }
+  .header-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .cart-btn { position: relative; background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; }
   .cart-badge {
     position: absolute; top: -4px; right: -6px; background: #C8102E; color: #FFF;
@@ -109,6 +109,11 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     background: #C8102E; color: #FFF; border: none; padding: 9px 20px;
     border-radius: 25px; font-size: 13px; font-weight: 600; cursor: pointer;
   }
+  .user-pill {
+    background: #EAFAF1; color: #1E8449; border: 1px solid #A9DFBF;
+    padding: 7px 14px; border-radius: 25px; font-size: 12.5px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
 
   /* Red Navigation Bar */
   .nav-bar {
@@ -120,15 +125,13 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   }
   .nav-bar a:hover, .nav-bar a.active { border-bottom: 2px solid #FFF; }
 
-  /* Page Visibility Switching */
+  /* Page Views */
   .page-view { display: none; flex: 1; }
-  .page-view.active { display: block; animation: fadeIn 0.2s ease-in; }
-  @keyframes fadeIn { from { opacity: 0.6; } to { opacity: 1; } }
+  .page-view.active { display: block; }
 
-  /* Shared Buttons & Section Containers */
   .btn-primary {
     background: #C8102E; color: #FFF; border: none; padding: 12px 28px;
-    border-radius: 30px; font-size: 15px; font-weight: 700; cursor: pointer;
+    border-radius: 30px; font-size: 14px; font-weight: 700; cursor: pointer;
     box-shadow: 0 4px 12px rgba(200,16,46,0.28); text-decoration: none; display: inline-block;
   }
   .btn-primary:hover { background: #A80C24; }
@@ -136,7 +139,6 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   .section-title { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 8px; color: #1E1E1E; }
   .section-sub { text-align: center; font-size: 14px; color: #666; margin-bottom: 26px; }
 
-  /* Page Banner Header for Inner Pages */
   .inner-banner {
     background: linear-gradient(90deg, #FFFDF9 0%, #F7ECE1 100%);
     padding: 34px 24px; text-align: center; border-bottom: 1px solid #EFE4D8;
@@ -144,7 +146,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   .inner-banner h1 { color: #C8102E; font-size: 36px; font-weight: 800; }
   .inner-banner p { color: #555; font-size: 15px; margin-top: 6px; }
 
-  /* HOME PAGE: Hero */
+  /* Hero */
   .hero {
     display: flex; align-items: center; justify-content: space-between;
     background: linear-gradient(90deg, #FFFDF9 0%, #F7ECE1 100%);
@@ -162,7 +164,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   .dot { width: 10px; height: 10px; border-radius: 50%; background: #D8C7BE; }
   .dot.active { background: #C8102E; }
 
-  /* Category Circles */
+  /* Categories */
   .categories {
     display: flex; justify-content: center; gap: 48px; padding: 32px 20px 10px; flex-wrap: wrap;
   }
@@ -171,12 +173,10 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   .cat-circle {
     width: 78px; height: 78px; border-radius: 50%; background: #FCEEEE;
     display: flex; align-items: center; justify-content: center; font-size: 34px;
-    margin: 0 auto 8px; border: 2px solid transparent;
+    margin: 0 auto 8px;
   }
-  .cat-item.active .cat-circle { border-color: #C8102E; background: #FADBD8; }
   .cat-label { font-size: 14px; font-weight: 700; color: #222; }
 
-  /* Filter Pills on Menu Page */
   .filter-pills { display: flex; justify-content: center; gap: 10px; margin-bottom: 26px; flex-wrap: wrap; }
   .pill-tab {
     padding: 8px 20px; border-radius: 25px; border: 1px solid #DDD;
@@ -184,7 +184,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   }
   .pill-tab.active, .pill-tab:hover { background: #C8102E; color: #FFF; border-color: #C8102E; }
 
-  /* Pizza Cards Grid */
+  /* Pizza Cards */
   .pizza-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
   @media (max-width: 980px) { .pizza-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 560px) { .pizza-grid { grid-template-columns: 1fr; } }
@@ -225,9 +225,11 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   .offer-div { width: 2px; height: 30px; background: #DFB3B3; }
   .offer-text { font-size: 16px; font-weight: 600; color: #222; }
 
-  /* OFFERS PAGE: Deal Cards */
-  .offers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  @media (max-width: 860px) { .offers-grid { grid-template-columns: 1fr; } }
+  /* Offers, About, Contact Layouts */
+  .offers-grid, .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .about-grid, .contact-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 32px; align-items: start; }
+  @media (max-width: 860px) { .offers-grid, .values-grid, .about-grid, .contact-grid { grid-template-columns: 1fr; } }
+
   .deal-card {
     background: #FFF9F8; border: 2px dashed #E6B0AA; border-radius: 18px; padding: 26px;
     text-align: center; display: flex; flex-direction: column; justify-content: space-between;
@@ -236,30 +238,12 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     background: #C8102E; color: #FFF; font-weight: 800; font-size: 13px;
     padding: 5px 14px; border-radius: 20px; display: inline-block; margin-bottom: 12px;
   }
-  .deal-card h3 { font-size: 21px; font-weight: 800; color: #1E1E1E; margin-bottom: 8px; }
-  .deal-card p { font-size: 13.5px; color: #555; margin-bottom: 16px; line-height: 1.5; }
   .coupon-box {
     background: #FFF; border: 1px solid #CCC; padding: 8px 14px; border-radius: 8px;
-    font-weight: 800; color: #C8102E; letter-spacing: 1.5px; margin-bottom: 14px;
+    font-weight: 800; color: #C8102E; letter-spacing: 1.5px; margin: 12px 0 14px;
   }
-
-  /* ABOUT US PAGE */
-  .about-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 36px; align-items: center; margin-bottom: 36px; }
-  @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; } }
-  .about-grid img { width: 100%; border-radius: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-  .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  @media (max-width: 860px) { .values-grid { grid-template-columns: 1fr; } }
-  .value-card {
-    background: #FFFDF9; border: 1px solid #EFE4D8; border-radius: 14px; padding: 22px; text-align: center;
-  }
-  .value-card .v-icon { font-size: 34px; margin-bottom: 10px; }
-
-  /* CONTACT PAGE */
-  .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 32px; }
-  @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; } }
-  .info-box {
-    background: #FFF8F6; border: 1px solid #F3D6D2; border-radius: 16px; padding: 26px;
-  }
+  .value-card { background: #FFFDF9; border: 1px solid #EFE4D8; border-radius: 14px; padding: 22px; text-align: center; }
+  .info-box { background: #FFF8F6; border: 1px solid #F3D6D2; border-radius: 16px; padding: 26px; }
   .info-row { display: flex; gap: 14px; margin-bottom: 18px; align-items: flex-start; }
   .contact-form-box {
     background: #FFF; border: 1px solid #E6E6E6; border-radius: 16px; padding: 26px;
@@ -273,9 +257,8 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   }
   .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
   .footer-links a { color: #FFF; text-decoration: none; font-size: 13px; cursor: pointer; }
-  .footer-links a:hover { color: #F5B7B1; }
 
-  /* Floating Chatbot Widget */
+  /* Floating Chatbot */
   .chat-widget {
     position: fixed; bottom: 20px; right: 24px; width: 340px; background: #FFF;
     border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.18);
@@ -287,7 +270,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   }
   .chat-controls span { cursor: pointer; margin-left: 12px; font-size: 15px; }
   .chat-body {
-    height: 260px; overflow-y: auto; padding: 14px; background: #FAFAFA;
+    height: 250px; overflow-y: auto; padding: 14px; background: #FAFAFA;
     display: flex; flex-direction: column; gap: 10px;
   }
   .msg-row { display: flex; align-items: flex-start; gap: 8px; }
@@ -307,7 +290,6 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     background: #FFF; border: 1px solid #D98880; color: #922B21; border-radius: 20px;
     padding: 4px 12px; font-size: 11.5px; font-weight: 600; cursor: pointer;
   }
-  .chip:hover { background: #FDEDEC; }
   .chat-input-wrap {
     display: flex; align-items: center; padding: 10px 12px; background: #FFF;
     border-top: 1px solid #EAEAEA; gap: 8px;
@@ -325,26 +307,37 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     box-shadow: 0 6px 20px rgba(200,16,46,0.35); cursor: pointer; display: none; z-index: 999;
   }
 
-  /* Modals & Toast */
+  /* Modals & Tabs */
   .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none;
     align-items: center; justify-content: center; z-index: 1000;
   }
   .modal-card {
-    background: #FFF; width: 440px; max-width: 92vw; border-radius: 16px;
-    padding: 24px; max-height: 85vh; overflow-y: auto;
+    background: #FFF; width: 520px; max-width: 94vw; border-radius: 16px;
+    padding: 24px; max-height: 88vh; overflow-y: auto;
   }
-  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
   .modal-head h3 { color: #C8102E; font-size: 20px; font-weight: 800; }
-  .form-group { margin-bottom: 12px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #EEE; padding-bottom: 10px; }
+  .tab-btn {
+    padding: 7px 14px; border-radius: 20px; border: 1px solid #DDD; background: #FAFAFA;
+    font-size: 12.5px; font-weight: 700; cursor: pointer;
+  }
+  .tab-btn.active { background: #C8102E; color: #FFF; border-color: #C8102E; }
+
+  .form-group { margin-bottom: 11px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #333; }
   .form-group input, .form-group select, .form-group textarea {
     width: 100%; padding: 9px 12px; border: 1px solid #CCC; border-radius: 8px; font-size: 13px;
   }
+  .qty-btn {
+    width: 24px; height: 24px; border-radius: 50%; border: 1px solid #CCC;
+    background: #FFF; font-weight: 700; cursor: pointer;
+  }
   .toast {
     position: fixed; top: 20px; right: 24px; background: #1E8449; color: #FFF;
-    padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600;
-    display: none; z-index: 1100; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 11px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    display: none; z-index: 1200; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
 </style>
 </head>
@@ -352,7 +345,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
 
 <div id="toast" class="toast"></div>
 
-<!-- Persistent Top Header -->
+<!-- Top Header -->
 <header class="top-header">
   <div class="logo-wrap" onclick="switchPage('home')">
     <div class="logo-icon">🍕</div>
@@ -372,11 +365,13 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       🛒 <span class="cart-badge" id="cartBadge">0</span>
     </button>
     <button class="btn-admin" onclick="openModal('adminModal')">⚙️ Store Admin</button>
-    <button class="btn-login" onclick="showToast('Welcome to Bingo & Gogo Pizza!')">👤 Login / Register</button>
+    <div id="authHeaderSlot">
+      <button class="btn-login" onclick="openModal('authModal')">👤 Login / Register</button>
+    </div>
   </div>
 </header>
 
-<!-- Persistent Navigation Bar -->
+<!-- Navigation Bar -->
 <nav class="nav-bar">
   <a id="nav-home" class="active" onclick="switchPage('home')">Home</a>
   <a id="nav-menu" onclick="switchPage('menu')">Menu</a>
@@ -398,28 +393,22 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800" alt="Delicious Pizza" />
     </div>
     <div class="hero-dots">
-      <span class="dot active"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
+      <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
     </div>
   </section>
 
   <section class="categories">
     <div class="cat-item" onclick="goToMenuCategory('Veg Pizzas')">
-      <div class="cat-circle">🌿</div>
-      <div class="cat-label">Veg Pizzas</div>
+      <div class="cat-circle">🌿</div><div class="cat-label">Veg Pizzas</div>
     </div>
     <div class="cat-item" onclick="goToMenuCategory('Non-Veg Pizzas')">
-      <div class="cat-circle">🍗</div>
-      <div class="cat-label">Non-Veg Pizzas</div>
+      <div class="cat-circle">🍗</div><div class="cat-label">Non-Veg Pizzas</div>
     </div>
     <div class="cat-item" onclick="goToMenuCategory('Cheese Pizzas')">
-      <div class="cat-circle">🧀</div>
-      <div class="cat-label">Cheese Pizzas</div>
+      <div class="cat-circle">🧀</div><div class="cat-label">Cheese Pizzas</div>
     </div>
     <div class="cat-item" onclick="goToMenuCategory('Special Pizzas')">
-      <div class="cat-circle">⭐</div>
-      <div class="cat-label">Special Pizzas</div>
+      <div class="cat-circle">⭐</div><div class="cat-label">Special Pizzas</div>
     </div>
   </section>
 
@@ -475,27 +464,25 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
         <div>
           <span class="deal-badge">FLAT 20% OFF</span>
           <h3>All Pizzas Mega Deal</h3>
-          <p>Enjoy 20% instant discount on every Veg, Non-Veg, Cheese, and Special Pizza on our menu.</p>
+          <p style="font-size:13.5px;color:#555;">Enjoy 20% instant discount on every Veg, Non-Veg, Cheese, and Special Pizza.</p>
           <div class="coupon-box">CODE: BINGO20</div>
         </div>
         <button class="btn-primary" onclick="claimPromoAndShop('BINGO20')">Apply &amp; Order Now</button>
       </div>
-
       <div class="deal-card">
         <div>
           <span class="deal-badge">FREE DELIVERY</span>
           <h3>Zero Delivery Fee</h3>
-          <p>Order above ₹299 and get piping hot doorstep delivery within 30 minutes at zero delivery charge.</p>
+          <p style="font-size:13.5px;color:#555;">Order above ₹299 and get doorstep delivery within 30 minutes at zero delivery charge.</p>
           <div class="coupon-box">AUTO-APPLIED &gt; ₹299</div>
         </div>
         <button class="btn-primary" onclick="switchPage('menu')">Browse Pizzas</button>
       </div>
-
       <div class="deal-card">
         <div>
           <span class="deal-badge">WEEKEND FEAST</span>
           <h3>Family Combo Savings</h3>
-          <p>Mix any 3 pizzas from our Special or Supreme range and save 20% with code BINGO20 at checkout.</p>
+          <p style="font-size:13.5px;color:#555;">Mix any 3 pizzas from our Special or Supreme range and save 20% with code BINGO20.</p>
           <div class="coupon-box">CODE: BINGO20</div>
         </div>
         <button class="btn-primary" onclick="claimPromoAndShop('BINGO20')">Start Combo Order</button>
@@ -515,34 +502,21 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       <div>
         <h2 style="color:#C8102E; font-size:28px; font-weight:800; margin-bottom:14px;">Our Story &amp; Kitchen Philosophy</h2>
         <p style="color:#444; font-size:15px; line-height:1.7; margin-bottom:14px;">
-          Founded with a simple belief—that great pizza brings people together—<strong>Bingo &amp; Gogo Pizza Shop</strong> hand-stretches every dough batch fresh each morning and bakes it at high stone-deck temperatures for a crisp, airy crust.
+          At <strong>Bingo &amp; Gogo Pizza Shop</strong>, every dough batch is hand-stretched fresh each morning and stone-baked for a crisp, airy crust.
         </p>
         <p style="color:#444; font-size:15px; line-height:1.7; margin-bottom:20px;">
-          From classic San Marzano tomato Margherita to our signature Tandoori Paneer Feast, every pizza is topped to order and delivered hot within 30 minutes.
+          From classic Margherita to our signature Tandoori Paneer Feast, every pizza is topped to order and delivered hot within 30 minutes.
         </p>
         <button class="btn-primary" onclick="switchPage('menu')">Taste Our Menu →</button>
       </div>
       <div>
-        <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=700" alt="Freshly Baked Pizza" />
+        <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=700" style="width:100%;border-radius:18px;" alt="Fresh Pizza" />
       </div>
     </div>
-
     <div class="values-grid">
-      <div class="value-card">
-        <div class="v-icon">🌿</div>
-        <h3 style="font-size:17px; margin-bottom:6px;">100% Separate Veg Prep</h3>
-        <p style="font-size:13px; color:#555;">Dedicated vegetarian prep counters, cutters, and baking trays for complete peace of mind.</p>
-      </div>
-      <div class="value-card">
-        <div class="v-icon">🧀</div>
-        <h3 style="font-size:17px; margin-bottom:6px;">Real Mozzarella &amp; Fresh Dough</h3>
-        <p style="font-size:13px; color:#555;">Never frozen dough paired with rich, creamy mozzarella and locally sourced crisp vegetables.</p>
-      </div>
-      <div class="value-card">
-        <div class="v-icon">⚡</div>
-        <h3 style="font-size:17px; margin-bottom:6px;">30-Minute Hot Delivery</h3>
-        <p style="font-size:13px; color:#555;">Insulated thermal delivery bags ensure your pizza arrives bubbling hot right at your door.</p>
-      </div>
+      <div class="value-card"><div style="font-size:34px;margin-bottom:8px;">🌿</div><h4>100% Separate Veg Prep</h4><p style="font-size:13px;color:#555;margin-top:6px;">Dedicated vegetarian prep counters, cutters, and baking trays.</p></div>
+      <div class="value-card"><div style="font-size:34px;margin-bottom:8px;">🧀</div><h4>Real Mozzarella &amp; Fresh Dough</h4><p style="font-size:13px;color:#555;margin-top:6px;">Never frozen dough paired with creamy mozzarella and crisp veggies.</p></div>
+      <div class="value-card"><div style="font-size:34px;margin-bottom:8px;">⚡</div><h4>30-Minute Hot Delivery</h4><p style="font-size:13px;color:#555;margin-top:6px;">Insulated thermal delivery bags keep your pizza bubbling hot.</p></div>
     </div>
   </section>
 </main>
@@ -551,55 +525,30 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
 <main id="page-contact" class="page-view">
   <div class="inner-banner">
     <h1>📞 Contact &amp; Store Location</h1>
-    <p>Have a question, party order request, or feedback? Reach out to us anytime</p>
+    <p>Questions, party orders, or feedback? Send us a direct message saved straight to our Store Admin inbox</p>
   </div>
   <section class="section-wrap">
     <div class="contact-grid">
       <div class="info-box">
         <h3 style="color:#C8102E; font-size:20px; font-weight:800; margin-bottom:18px;">Visit or Call Us</h3>
-        <div class="info-row">
-          <span style="font-size:22px;">📍</span>
-          <div>
-            <strong>Store Address</strong>
-            <p style="font-size:13.5px; color:#555;">742 Evergreen Pizza Avenue, Food District</p>
-          </div>
-        </div>
-        <div class="info-row">
-          <span style="font-size:22px;">📞</span>
-          <div>
-            <strong>Phone &amp; Order Support</strong>
-            <p style="font-size:13.5px; color:#555;">(555) 839-7499</p>
-          </div>
-        </div>
-        <div class="info-row">
-          <span style="font-size:22px;">🕒</span>
-          <div>
-            <strong>Opening Hours</strong>
-            <p style="font-size:13.5px; color:#555;">Monday – Sunday: 11:00 AM – 11:00 PM</p>
-          </div>
-        </div>
-        <div class="info-row">
-          <span style="font-size:22px;">🛵</span>
-          <div>
-            <strong>Delivery Zone</strong>
-            <p style="font-size:13.5px; color:#555;">Within 5 km radius (Free delivery above ₹299)</p>
-          </div>
-        </div>
-        <button class="btn-primary" style="margin-top:8px;" onclick="toggleChat(true)">💬 Chat with AI Assistant</button>
+        <div class="info-row"><span style="font-size:22px;">📍</span><div><strong>Store Address</strong><p style="font-size:13.5px;color:#555;">742 Evergreen Pizza Avenue, Food District</p></div></div>
+        <div class="info-row"><span style="font-size:22px;">📞</span><div><strong>Phone &amp; Order Support</strong><p style="font-size:13.5px;color:#555;">(555) 839-7499</p></div></div>
+        <div class="info-row"><span style="font-size:22px;">🕒</span><div><strong>Opening Hours</strong><p style="font-size:13.5px;color:#555;">Monday – Sunday: 11:00 AM – 11:00 PM</p></div></div>
+        <div class="info-row"><span style="font-size:22px;">🛵</span><div><strong>Delivery Zone</strong><p style="font-size:13.5px;color:#555;">Within 5 km radius (Free delivery above ₹299)</p></div></div>
       </div>
 
       <div class="contact-form-box">
         <h3 style="color:#1E1E1E; font-size:20px; font-weight:800; margin-bottom:14px;">Send Us a Message</h3>
-        <div class="form-group"><label>Your Name</label><input id="contactName" placeholder="Enter your name" /></div>
-        <div class="form-group"><label>Phone or Email</label><input id="contactEmail" placeholder="Enter phone number or email" /></div>
-        <div class="form-group"><label>Message / Catering Inquiry</label><textarea id="contactMsg" rows="4" placeholder="How can we help you?"></textarea></div>
-        <button class="btn-primary" style="width:100%;" onclick="submitContactForm()">Send Message</button>
+        <div class="form-group"><label>Your Name *</label><input id="contactName" placeholder="Enter your full name" /></div>
+        <div class="form-group"><label>Phone or Email *</label><input id="contactEmail" placeholder="Enter phone number or email" /></div>
+        <div class="form-group"><label>Message / Catering Inquiry *</label><textarea id="contactMsg" rows="4" placeholder="Write your message here..."></textarea></div>
+        <button class="btn-primary" id="sendMsgBtn" style="width:100%;" onclick="submitContactForm()">Send Message</button>
       </div>
     </div>
   </section>
 </main>
 
-<!-- Persistent Footer -->
+<!-- Footer -->
 <footer class="site-footer">
   <div>
     <strong style="color:#FFF; font-size:16px;">🍕 Bingo &amp; Gogo Pizza Shop</strong>
@@ -614,22 +563,15 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   </div>
 </footer>
 
-<!-- Floating Chatbot Widget (Persistent Across All Pages) -->
+<!-- Floating Chatbot Widget -->
 <button class="chat-launcher" id="chatLauncher" onclick="toggleChat(true)">🍕 Bingo &amp; Gogo Assistant</button>
-
 <div class="chat-widget" id="chatWidget">
   <div class="chat-header">
     <span>🍕 Bingo &amp; Gogo Assistant</span>
-    <div class="chat-controls">
-      <span onclick="toggleChat(false)">—</span>
-      <span onclick="toggleChat(false)">✕</span>
-    </div>
+    <div class="chat-controls"><span onclick="toggleChat(false)">—</span><span onclick="toggleChat(false)">✕</span></div>
   </div>
   <div class="chat-body" id="chatBody">
-    <div class="msg-row bot">
-      <div class="bot-avatar">🤖</div>
-      <div class="msg-bubble">Hello! Welcome to Bingo &amp; Gogo Pizza! How can I help you?</div>
-    </div>
+    <div class="msg-row bot"><div class="bot-avatar">🤖</div><div class="msg-bubble">Hello! Welcome to Bingo &amp; Gogo Pizza! How can I help you?</div></div>
   </div>
   <div class="quick-chips">
     <button class="chip" onclick="sendQuick('Show Menu')">Show Menu</button>
@@ -642,56 +584,107 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   </div>
 </div>
 
-<!-- Cart Modal -->
+<!-- ==================== MODAL 1: CART & REAL CHECKOUT ==================== -->
 <div class="modal-backdrop" id="cartModal">
   <div class="modal-card">
     <div class="modal-head">
-      <h3>🛒 Your Cart</h3>
+      <h3>🛒 Your Cart &amp; Checkout</h3>
       <button onclick="closeModal('cartModal')" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
     </div>
     <div id="cartItemsList"></div>
-    <div style="margin-top:14px; display:flex; gap:8px;">
-      <input type="text" id="promoInput" placeholder="Promo code (e.g. BINGO20)" style="flex:1;padding:8px;border:1px solid #CCC;border-radius:8px;" />
-      <button class="btn-add" onclick="applyPromo()">Apply</button>
+
+    <div id="checkoutSection" style="display:none; margin-top:14px; border-top:1px solid #EEE; padding-top:12px;">
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <input type="text" id="promoInput" placeholder="Promo code (BINGO20)" style="flex:1;padding:8px;border:1px solid #CCC;border-radius:8px;font-size:13px;" />
+        <button class="btn-add" onclick="applyPromo()">Apply</button>
+      </div>
+      <div id="cartTotalBox" style="font-weight:800; font-size:16px; margin-bottom:12px; color:#1E1E1E;"></div>
+
+      <div class="form-group"><label>Customer Name *</label><input id="orderName" placeholder="Your full name" /></div>
+      <div class="form-group"><label>Phone Number *</label><input id="orderPhone" placeholder="10-digit mobile number" /></div>
+      <div class="form-group"><label>Delivery Address *</label><input id="orderAddress" placeholder="House/Flat No, Street, Landmark" /></div>
+      <button class="btn-primary" id="placeOrderBtn" style="width:100%; text-align:center;" onclick="placeOrder()">Confirm &amp; Place Order</button>
     </div>
-    <div id="cartTotalBox" style="margin-top:14px; font-weight:700; font-size:16px;"></div>
-    <button class="btn-primary" style="width:100%; margin-top:14px; text-align:center;" onclick="placeOrder()">Place Order</button>
   </div>
 </div>
 
-<!-- Zero-Code SQL Admin Modal -->
-<div class="modal-backdrop" id="adminModal">
+<!-- ==================== MODAL 2: LOGIN / REGISTER ==================== -->
+<div class="modal-backdrop" id="authModal">
   <div class="modal-card">
     <div class="modal-head">
-      <h3>⚙️ Store Admin (Live SQL)</h3>
+      <h3>👤 Customer Account</h3>
+      <button onclick="closeModal('authModal')" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">Login</button>
+      <button class="tab-btn" id="tabRegBtn" onclick="switchAuthTab('register')">Register New Account</button>
+    </div>
+
+    <div id="loginFormBox">
+      <div class="form-group"><label>Email Address *</label><input type="email" id="loginEmail" placeholder="you@example.com" /></div>
+      <div class="form-group"><label>Password *</label><input type="password" id="loginPassword" placeholder="Enter your password" /></div>
+      <button class="btn-primary" style="width:100%;" onclick="loginCustomer()">Login</button>
+    </div>
+
+    <div id="registerFormBox" style="display:none;">
+      <div class="form-group"><label>Full Name *</label><input id="regName" placeholder="e.g. Rahul Sharma" /></div>
+      <div class="form-group"><label>Email Address *</label><input type="email" id="regEmail" placeholder="you@example.com" /></div>
+      <div class="form-group"><label>Phone Number *</label><input id="regPhone" placeholder="e.g. 9876543210" /></div>
+      <div class="form-group"><label>Create Password *</label><input type="password" id="regPassword" placeholder="Choose a password" /></div>
+      <button class="btn-primary" style="width:100%;" onclick="registerCustomer()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL 3: STORE ADMIN (MENU + ORDERS + INBOX) ==================== -->
+<div class="modal-backdrop" id="adminModal">
+  <div class="modal-card" style="width:620px;">
+    <div class="modal-head">
+      <h3>⚙️ Store Admin Control Center</h3>
       <button onclick="closeModal('adminModal')" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
     </div>
+
     <div id="adminLoginBox">
       <div class="form-group">
         <label>Admin Password</label>
-        <input type="password" id="adminPwdInput" placeholder="Enter admin password" />
+        <input type="password" id="adminPwdInput" placeholder="Enter admin password (default: bingo123)" onkeydown="if(event.key==='Enter') unlockAdmin()" />
       </div>
-      <button class="btn-primary" style="width:100%;" onclick="unlockAdmin()">Unlock Database</button>
+      <button class="btn-primary" style="width:100%;" onclick="unlockAdmin()">Unlock Admin Panel</button>
     </div>
-    <div id="adminPanelBox" style="display:none;">
-      <h4 style="margin-bottom:10px; color:#1E8449;">➕ Add New Pizza to Supabase</h4>
-      <div class="form-group">
-        <label>Category</label>
-        <select id="newCat">
-          <option>Veg Pizzas</option>
-          <option>Non-Veg Pizzas</option>
-          <option>Cheese Pizzas</option>
-          <option>Special Pizzas</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Pizza Name</label><input id="newName" placeholder="e.g. Paneer Makhani Pizza" /></div>
-      <div class="form-group"><label>Price (₹)</label><input id="newPrice" placeholder="e.g. ₹269" /></div>
-      <div class="form-group"><label>Description</label><input id="newDesc" placeholder="Toppings & crust details" /></div>
-      <div class="form-group"><label>Image URL</label><input id="newImg" value="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500" /></div>
-      <button class="btn-primary" style="width:100%; margin-bottom:18px;" onclick="addPizzaToDB()">Save to SQL Database</button>
 
-      <h4 style="margin-bottom:8px; color:#C8102E;">🗑️ Delete Pizza from Supabase</h4>
-      <div id="adminDeleteList"></div>
+    <div id="adminPanelBox" style="display:none;">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="admTabMenu" onclick="switchAdminTab('menu')">🍕 Menu (SQL)</button>
+        <button class="tab-btn" id="admTabOrders" onclick="switchAdminTab('orders')">🛵 Live Orders</button>
+        <button class="tab-btn" id="admTabMsgs" onclick="switchAdminTab('msgs')">📩 Customer Messages</button>
+      </div>
+
+      <!-- Admin Tab 1: Menu -->
+      <div id="admViewMenu">
+        <h4 style="margin-bottom:8px; color:#1E8449;">➕ Add New Pizza</h4>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="newCat"><option>Veg Pizzas</option><option>Non-Veg Pizzas</option><option>Cheese Pizzas</option><option>Special Pizzas</option></select>
+        </div>
+        <div class="form-group"><label>Pizza Name</label><input id="newName" placeholder="e.g. Paneer Makhani Pizza" /></div>
+        <div class="form-group"><label>Price (₹)</label><input id="newPrice" placeholder="e.g. ₹269" /></div>
+        <div class="form-group"><label>Description</label><input id="newDesc" placeholder="Toppings & crust details" /></div>
+        <div class="form-group"><label>Image URL</label><input id="newImg" value="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500" /></div>
+        <button class="btn-primary" style="width:100%; margin-bottom:16px;" onclick="addPizzaToDB()">Save Pizza to Supabase</button>
+
+        <h4 style="margin-bottom:8px; color:#C8102E;">🗑️ Existing Menu Items</h4>
+        <div id="adminDeleteList"></div>
+      </div>
+
+      <!-- Admin Tab 2: Live Orders -->
+      <div id="admViewOrders" style="display:none;">
+        <div id="adminOrdersList"><p style="color:#666;font-size:13px;">Loading live orders...</p></div>
+      </div>
+
+      <!-- Admin Tab 3: Customer Messages -->
+      <div id="admViewMsgs" style="display:none;">
+        <div id="adminMsgsList"><p style="color:#666;font-size:13px;">Loading customer inquiries...</p></div>
+      </div>
     </div>
   </div>
 </div>
@@ -701,38 +694,38 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   let menuItems = [];
   let activePage = "home";
   let menuCategory = "All";
-  let cart = [];
+  let cart = []; // [{item, qty}]
   let discountApplied = false;
+  let currentUser = null;
   let lastOrderId = null;
   let chatHistory = [];
 
-  function showToast(msg) {
+  const SB_HEADERS = {
+    "apikey": CFG.SUPABASE_KEY,
+    "Authorization": `Bearer ${CFG.SUPABASE_KEY}`,
+    "Content-Type": "application/json"
+  };
+
+  function showToast(msg, isError = false) {
     const t = document.getElementById("toast");
+    t.style.background = isError ? "#C8102E" : "#1E8449";
     t.textContent = msg;
     t.style.display = "block";
-    setTimeout(() => { t.style.display = "none"; }, 3000);
+    setTimeout(() => { t.style.display = "none"; }, 3500);
   }
 
-  // Multi-Page Navigation Controller
+  // ==================== NAVIGATION ====================
   function switchPage(pageName) {
     activePage = pageName;
     document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
     document.querySelectorAll(".nav-bar a").forEach(a => a.classList.remove("active"));
-
-    const targetPage = document.getElementById("page-" + pageName);
-    const targetNav = document.getElementById("nav-" + pageName);
-    if (targetPage) targetPage.classList.add("active");
-    if (targetNav) targetNav.classList.add("active");
-
+    document.getElementById("page-" + pageName)?.classList.add("active");
+    document.getElementById("nav-" + pageName)?.classList.add("active");
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (pageName === "menu") renderFullMenu();
   }
 
-  function goToMenuCategory(cat) {
-    switchPage("menu");
-    setMenuCategory(cat);
-  }
-
+  function goToMenuCategory(cat) { switchPage("menu"); setMenuCategory(cat); }
   function setMenuCategory(cat) {
     menuCategory = cat;
     document.querySelectorAll("#menuFilterPills .pill-tab").forEach(btn => {
@@ -740,30 +733,19 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     });
     renderFullMenu();
   }
+  function handleSearch() { if (activePage !== "menu") switchPage("menu"); renderFullMenu(); }
 
-  function handleSearch() {
-    if (activePage !== "menu") switchPage("menu");
-    renderFullMenu();
-  }
-
-  // Fetch Live Menu Rows from Supabase
+  // ==================== LIVE MENU FETCH ====================
   async function fetchLiveMenu() {
     try {
-      const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/menu_items?select=*&order=id.asc`, {
-        headers: {
-          "apikey": CFG.SUPABASE_KEY,
-          "Authorization": `Bearer ${CFG.SUPABASE_KEY}`
-        }
-      });
+      const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/menu_items?select=*&order=id.asc`, { headers: SB_HEADERS });
       if (res.ok) {
         menuItems = await res.json();
         renderHomePopular();
         renderFullMenu();
         renderAdminDeleteList();
       }
-    } catch (err) {
-      console.error("Supabase fetch error:", err);
-    }
+    } catch (e) { console.error(e); }
     return menuItems;
   }
 
@@ -781,18 +763,14 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
           <span class="pizza-price">${item.pricing}</span>
           <button class="btn-add" onclick="addToCart(${item.id})">Add to Cart</button>
         </div>
-      </div>
-    `;
+      </div>`;
   }
 
   function renderHomePopular() {
     const grid = document.getElementById("homePizzaGrid");
-    if (!menuItems.length) {
-      grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#666;">No pizzas found. Add pizzas via Store Admin.</p>`;
-      return;
-    }
-    // Show first 4 popular pizzas on Home Page
-    grid.innerHTML = menuItems.slice(0, 4).map(item => buildPizzaCardHTML(item, false)).join("");
+    grid.innerHTML = menuItems.length
+      ? menuItems.slice(0, 4).map(i => buildPizzaCardHTML(i, false)).join("")
+      : `<p style="grid-column:1/-1;text-align:center;color:#666;">No pizzas found.</p>`;
   }
 
   function renderFullMenu() {
@@ -804,75 +782,44 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       const matchText = !q || item.name.toLowerCase().includes(q) || (item.description || "").toLowerCase().includes(q);
       return matchCat && matchText;
     });
-
-    if (!filtered.length) {
-      grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#666;">No pizzas match your filter.</p>`;
-      return;
-    }
-    grid.innerHTML = filtered.map(item => buildPizzaCardHTML(item, true)).join("");
+    grid.innerHTML = filtered.length
+      ? filtered.map(i => buildPizzaCardHTML(i, true)).join("")
+      : `<p style="grid-column:1/-1;text-align:center;color:#666;">No pizzas match your filter.</p>`;
   }
 
-  function claimPromoAndShop(code) {
-    discountApplied = true;
-    document.getElementById("promoInput").value = code;
-    showToast(`Promo ${code} (20% OFF) activated! Pick your pizzas.`);
-    switchPage("menu");
-  }
-
-  function submitContactForm() {
-    const name = document.getElementById("contactName").value.trim();
-    const msg = document.getElementById("contactMsg").value.trim();
-    if (!name || !msg) {
-      showToast("Please enter your name and message.");
-      return;
-    }
-    document.getElementById("contactName").value = "";
-    document.getElementById("contactEmail").value = "";
-    document.getElementById("contactMsg").value = "";
-    showToast(`Thank you ${name}! Our team will contact you shortly.`);
-  }
-
-  // Cart & Promo Logic
+  // ==================== 1. CART & REAL ORDER PLACEMENT ====================
   function parsePrice(str) {
     const num = parseFloat(String(str).replace(/[^0-9.]/g, ""));
     return isNaN(num) ? 0 : num;
   }
 
+  function updateCartBadge() {
+    const totalCount = cart.reduce((sum, entry) => sum + entry.qty, 0);
+    document.getElementById("cartBadge").textContent = totalCount;
+  }
+
   function addToCart(id) {
     const found = menuItems.find(i => i.id === id);
-    if (found) {
-      cart.push(found);
-      document.getElementById("cartBadge").textContent = cart.length;
-      showToast(`Added ${found.name} to cart!`);
-    }
+    if (!found) return;
+    const existing = cart.find(c => c.item.id === id);
+    if (existing) existing.qty += 1;
+    else cart.push({ item: found, qty: 1 });
+    updateCartBadge();
+    showToast(`Added ${found.name} to cart!`);
   }
 
-  function renderCart() {
-    const list = document.getElementById("cartItemsList");
-    const totalBox = document.getElementById("cartTotalBox");
-    if (!cart.length) {
-      list.innerHTML = `<p style="color:#666;font-size:13px;">Your cart is empty.</p>`;
-      totalBox.textContent = "";
-      return;
-    }
-    let subtotal = 0;
-    list.innerHTML = cart.map((item, idx) => {
-      subtotal += parsePrice(item.pricing);
-      return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #EEE;font-size:13px;">
-        <span>${item.name}</span>
-        <span><b>${item.pricing}</b> <a href="#" onclick="removeCart(${idx});return false;" style="color:#C8102E;margin-left:6px;">✕</a></span>
-      </div>`;
-    }).join("");
-    const finalTotal = discountApplied ? Math.round(subtotal * 0.8) : subtotal;
-    totalBox.innerHTML = discountApplied
-      ? `Subtotal: ₹${subtotal} → <span style="color:#1E8449;">20% OFF Applied: ₹${finalTotal}</span>`
-      : `Total: ₹${finalTotal}`;
-  }
-
-  function removeCart(idx) {
-    cart.splice(idx, 1);
-    document.getElementById("cartBadge").textContent = cart.length;
+  function changeQty(idx, delta) {
+    cart[idx].qty += delta;
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
+    updateCartBadge();
     renderCart();
+  }
+
+  function claimPromoAndShop(code) {
+    discountApplied = true;
+    document.getElementById("promoInput").value = code;
+    showToast(`Promo ${code} (20% OFF) activated!`);
+    switchPage("menu");
   }
 
   function applyPromo() {
@@ -882,35 +829,233 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       renderCart();
       showToast("20% OFF Promo Applied!");
     } else {
-      showToast("Use code BINGO20 for 20% OFF");
+      showToast("Enter BINGO20 for 20% OFF", true);
     }
   }
 
-  function placeOrder() {
-    if (!cart.length) return;
-    lastOrderId = "BG-" + Math.floor(1000 + Math.random() * 9000);
-    cart = [];
-    discountApplied = false;
-    document.getElementById("cartBadge").textContent = "0";
-    closeModal("cartModal");
-    showToast(`Order ${lastOrderId} confirmed! Baking fresh now.`);
+  function renderCart() {
+    const list = document.getElementById("cartItemsList");
+    const checkoutSec = document.getElementById("checkoutSection");
+    const totalBox = document.getElementById("cartTotalBox");
+
+    if (!cart.length) {
+      list.innerHTML = `<p style="color:#666;font-size:13.5px;padding:12px 0;">Your cart is empty. Add pizzas from the Menu to order!</p>`;
+      checkoutSec.style.display = "none";
+      return;
+    }
+
+    checkoutSec.style.display = "block";
+    if (currentUser) {
+      if (!document.getElementById("orderName").value) document.getElementById("orderName").value = currentUser.full_name;
+      if (!document.getElementById("orderPhone").value) document.getElementById("orderPhone").value = currentUser.phone;
+    }
+
+    let subtotal = 0;
+    list.innerHTML = cart.map((entry, idx) => {
+      const unitPrice = parsePrice(entry.item.pricing);
+      subtotal += unitPrice * entry.qty;
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #EEE;font-size:13px;">
+          <div><strong>${entry.item.name}</strong><div style="color:#777;font-size:11.5px;">₹${unitPrice} each</div></div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="qty-btn" onclick="changeQty(${idx}, -1)">–</button>
+            <span><b>${entry.qty}</b></span>
+            <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
+            <span style="min-width:52px;text-align:right;font-weight:700;">₹${unitPrice * entry.qty}</span>
+          </div>
+        </div>`;
+    }).join("");
+
+    const finalTotal = discountApplied ? Math.round(subtotal * 0.8) : subtotal;
+    totalBox.innerHTML = discountApplied
+      ? `Subtotal: ₹${subtotal} → <span style="color:#1E8449;">20% OFF Total: ₹${finalTotal}</span>`
+      : `Grand Total: ₹${finalTotal}`;
   }
 
+  async function placeOrder() {
+    if (!cart.length) return;
+    const cName = document.getElementById("orderName").value.trim();
+    const cPhone = document.getElementById("orderPhone").value.trim();
+    const cAddr = document.getElementById("orderAddress").value.trim();
+    if (!cName || !cPhone || !cAddr) {
+      showToast("Please fill in Name, Phone, and Delivery Address.", true);
+      return;
+    }
+
+    const subtotal = cart.reduce((sum, e) => sum + parsePrice(e.item.pricing) * e.qty, 0);
+    const finalTotal = discountApplied ? Math.round(subtotal * 0.8) : subtotal;
+    const itemsSummary = cart.map(e => `${e.qty}x ${e.item.name}`).join(", ");
+    const orderCode = "BG-" + Math.floor(1000 + Math.random() * 9000);
+
+    const btn = document.getElementById("placeOrderBtn");
+    btn.disabled = true; btn.textContent = "Placing Order...";
+
+    try {
+      const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/orders`, {
+        method: "POST",
+        headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+        body: JSON.stringify({
+          order_code: orderCode,
+          customer_name: cName,
+          customer_phone: cPhone,
+          delivery_address: cAddr,
+          items_summary: itemsSummary,
+          total_amount: finalTotal,
+          status: "Preparing in Oven"
+        })
+      });
+      if (res.ok) {
+        lastOrderId = orderCode;
+        cart = [];
+        discountApplied = false;
+        updateCartBadge();
+        closeModal("cartModal");
+        showToast(`Order ${orderCode} placed! Track it anytime in the chatbot.`);
+        appendChat("bot", `🎉 Order **${orderCode}** confirmed for ${cName}! Total: ₹${finalTotal}. Status: *Preparing in Oven*.`);
+      } else {
+        showToast("Could not save order. Ensure 'orders' table SQL was executed.", true);
+      }
+    } finally {
+      btn.disabled = false; btn.textContent = "Confirm & Place Order";
+    }
+  }
+
+  // ==================== 2. LOGIN / REGISTER (SUPABASE CUSTOMERS) ====================
+  function switchAuthTab(mode) {
+    document.getElementById("tabLoginBtn").classList.toggle("active", mode === "login");
+    document.getElementById("tabRegBtn").classList.toggle("active", mode === "register");
+    document.getElementById("loginFormBox").style.display = mode === "login" ? "block" : "none";
+    document.getElementById("registerFormBox").style.display = mode === "register" ? "block" : "none";
+  }
+
+  function updateAuthUI() {
+    const slot = document.getElementById("authHeaderSlot");
+    if (currentUser) {
+      slot.innerHTML = `
+        <div class="user-pill">
+          <span>👤 Hi, ${currentUser.full_name.split(" ")[0]}</span>
+          <a href="#" onclick="logoutCustomer();return false;" style="color:#C8102E;font-size:11px;text-decoration:none;">Logout</a>
+        </div>`;
+      document.getElementById("contactName").value = currentUser.full_name;
+      document.getElementById("contactEmail").value = currentUser.email;
+    } else {
+      slot.innerHTML = `<button class="btn-login" onclick="openModal('authModal')">👤 Login / Register</button>`;
+    }
+  }
+
+  async function registerCustomer() {
+    const full_name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
+    const phone = document.getElementById("regPhone").value.trim();
+    const password = document.getElementById("regPassword").value;
+
+    if (!full_name || !email || !phone || !password) {
+      showToast("All registration fields are required.", true);
+      return;
+    }
+
+    const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/customers`, {
+      method: "POST",
+      headers: { ...SB_HEADERS, "Prefer": "return=representation" },
+      body: JSON.stringify({ full_name, email, phone, password })
+    });
+
+    if (res.ok) {
+      const rows = await res.json();
+      currentUser = rows[0] || { full_name, email, phone };
+      updateAuthUI();
+      closeModal("authModal");
+      showToast(`Welcome ${full_name}! Account created.`);
+    } else {
+      showToast("Registration failed (email may already exist or check SQL table).", true);
+    }
+  }
+
+  async function loginCustomer() {
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password = document.getElementById("loginPassword").value;
+    if (!email || !password) {
+      showToast("Enter email and password.", true);
+      return;
+    }
+
+    const res = await fetch(
+      `${CFG.SUPABASE_URL}/rest/v1/customers?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(password)}&select=*`,
+      { headers: SB_HEADERS }
+    );
+    const rows = await res.json();
+    if (rows && rows.length > 0) {
+      currentUser = rows[0];
+      updateAuthUI();
+      closeModal("authModal");
+      showToast(`Welcome back, ${currentUser.full_name}!`);
+    } else {
+      showToast("Invalid email or password.", true);
+    }
+  }
+
+  function logoutCustomer() {
+    currentUser = null;
+    updateAuthUI();
+    showToast("Logged out.");
+  }
+
+  // ==================== 3. CONTACT -> SEND MESSAGE ====================
+  async function submitContactForm() {
+    const sender_name = document.getElementById("contactName").value.trim();
+    const contact_info = document.getElementById("contactEmail").value.trim();
+    const message = document.getElementById("contactMsg").value.trim();
+    if (!sender_name || !contact_info || !message) {
+      showToast("Please fill in Name, Phone/Email, and Message.", true);
+      return;
+    }
+
+    const btn = document.getElementById("sendMsgBtn");
+    btn.disabled = true; btn.textContent = "Sending...";
+
+    try {
+      const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/contact_messages`, {
+        method: "POST",
+        headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+        body: JSON.stringify({ sender_name, contact_info, message })
+      });
+      if (res.ok) {
+        document.getElementById("contactMsg").value = "";
+        showToast("Message sent! Viewable in Store Admin → Customer Messages.");
+      } else {
+        showToast("Failed to send. Ensure 'contact_messages' SQL table exists.", true);
+      }
+    } finally {
+      btn.disabled = false; btn.textContent = "Send Message";
+    }
+  }
+
+  // ==================== 4. STORE ADMIN (MENU + ORDERS + INBOX) ====================
   function openModal(id) {
     if (id === "cartModal") renderCart();
     document.getElementById(id).style.display = "flex";
   }
   function closeModal(id) { document.getElementById(id).style.display = "none"; }
 
-  // Admin Panel
   function unlockAdmin() {
     if (document.getElementById("adminPwdInput").value === CFG.ADMIN_PASSWORD) {
       document.getElementById("adminLoginBox").style.display = "none";
       document.getElementById("adminPanelBox").style.display = "block";
       renderAdminDeleteList();
+      loadAdminOrders();
+      loadAdminMessages();
     } else {
-      showToast("Incorrect Admin Password");
+      showToast("Incorrect Admin Password.", true);
     }
+  }
+
+  function switchAdminTab(tab) {
+    ["menu", "orders", "msgs"].forEach(t => {
+      document.getElementById("admTab" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("active", t === tab);
+      document.getElementById("admView" + t.charAt(0).toUpperCase() + t.slice(1)).style.display = (t === tab) ? "block" : "none";
+    });
+    if (tab === "orders") loadAdminOrders();
+    if (tab === "msgs") loadAdminMessages();
   }
 
   async function addPizzaToDB() {
@@ -926,12 +1071,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
 
     const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/menu_items`, {
       method: "POST",
-      headers: {
-        "apikey": CFG.SUPABASE_KEY,
-        "Authorization": `Bearer ${CFG.SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-      },
+      headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
       body: JSON.stringify(payload)
     });
     if (res.ok) {
@@ -950,23 +1090,65 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EEE;font-size:13px;">
         <span>${item.name} (${item.pricing})</span>
         <button class="btn-add" onclick="deletePizzaFromDB(${item.id})">Delete</button>
-      </div>
-    `).join("");
+      </div>`).join("");
   }
 
   async function deletePizzaFromDB(id) {
-    await fetch(`${CFG.SUPABASE_URL}/rest/v1/menu_items?id=eq.${id}`, {
-      method: "DELETE",
-      headers: {
-        "apikey": CFG.SUPABASE_KEY,
-        "Authorization": `Bearer ${CFG.SUPABASE_KEY}`
-      }
-    });
+    await fetch(`${CFG.SUPABASE_URL}/rest/v1/menu_items?id=eq.${id}`, { method: "DELETE", headers: SB_HEADERS });
     await fetchLiveMenu();
-    showToast("Deleted from Supabase!");
+    showToast("Pizza deleted from database!");
   }
 
-  // Real-Time Chatbot
+  async function loadAdminOrders() {
+    const box = document.getElementById("adminOrdersList");
+    const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/orders?select=*&order=id.desc`, { headers: SB_HEADERS });
+    if (!res.ok) { box.innerHTML = "<p>Run Step 1 SQL to enable orders.</p>"; return; }
+    const orders = await res.json();
+    if (!orders.length) { box.innerHTML = "<p style='font-size:13px;color:#666;'>No orders placed yet.</p>"; return; }
+
+    box.innerHTML = orders.map(o => `
+      <div style="border:1px solid #EEE;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12.5px;">
+        <div style="display:flex;justify-content:space-between;">
+          <strong>${o.order_code} — ${o.customer_name} (${o.customer_phone})</strong>
+          <span style="color:#C8102E;font-weight:800;">₹${o.total_amount}</span>
+        </div>
+        <div style="color:#444;margin:4px 0;">Items: ${o.items_summary}</div>
+        <div style="color:#666;margin-bottom:6px;">Address: ${o.delivery_address}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span>Status:</span>
+          <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid #CCC;font-size:12px;">
+            <option ${o.status==='Preparing in Oven'?'selected':''}>Preparing in Oven</option>
+            <option ${o.status==='Out for Delivery'?'selected':''}>Out for Delivery</option>
+            <option ${o.status==='Delivered'?'selected':''}>Delivered</option>
+          </select>
+        </div>
+      </div>`).join("");
+  }
+
+  async function updateOrderStatus(orderId, newStatus) {
+    await fetch(`${CFG.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
+      method: "PATCH",
+      headers: SB_HEADERS,
+      body: JSON.stringify({ status: newStatus })
+    });
+    showToast(`Order status updated to: ${newStatus}`);
+  }
+
+  async function loadAdminMessages() {
+    const box = document.getElementById("adminMsgsList");
+    const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/contact_messages?select=*&order=id.desc`, { headers: SB_HEADERS });
+    if (!res.ok) { box.innerHTML = "<p>Run Step 1 SQL to enable messages.</p>"; return; }
+    const msgs = await res.json();
+    if (!msgs.length) { box.innerHTML = "<p style='font-size:13px;color:#666;'>No customer messages yet.</p>"; return; }
+
+    box.innerHTML = msgs.map(m => `
+      <div style="border:1px solid #EEE;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12.5px;">
+        <strong>${m.sender_name}</strong> <span style="color:#777;">(${m.contact_info})</span>
+        <p style="margin-top:4px;color:#222;">${m.message}</p>
+      </div>`).join("");
+  }
+
+  // ==================== REAL-TIME CHATBOT ====================
   function toggleChat(show) {
     document.getElementById("chatWidget").style.display = show ? "block" : "none";
     document.getElementById("chatLauncher").style.display = show ? "none" : "block";
@@ -996,12 +1178,21 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     appendChat("user", text);
     chatHistory.push({ role: "user", content: text });
 
-    const freshMenu = await fetchLiveMenu();
+    const [freshMenu, ordersRes] = await Promise.all([
+      fetchLiveMenu(),
+      fetch(`${CFG.SUPABASE_URL}/rest/v1/orders?select=order_code,customer_name,items_summary,total_amount,status&order=id.desc&limit=10`, { headers: SB_HEADERS })
+    ]);
+    const recentOrders = ordersRes.ok ? await ordersRes.json() : [];
     const menuContext = freshMenu.map(i => `- ${i.name} (${i.category}): ${i.pricing} — ${i.description || ''}`).join("\n");
+    const ordersContext = recentOrders.map(o => `- ${o.order_code} (${o.customer_name}): ${o.items_summary} | ₹${o.total_amount} | Status: ${o.status}`).join("\n");
 
     const systemPrompt = `You are the friendly AI Assistant for Bingo & Gogo Pizza Shop.
 LIVE MENU FROM SUPABASE:
 ${menuContext}
+
+RECENT LIVE ORDERS:
+${ordersContext || "No recent orders"}
+CURRENT SESSION ORDER ID: ${lastOrderId || "None"}
 
 OPERATIONS & OFFERS:
 ${CFG.OPS_TEXT}
@@ -1009,20 +1200,15 @@ ${CFG.OPS_TEXT}
 POLICIES:
 ${CFG.POL_TEXT}
 
-ACTIVE CUSTOMER ORDER ID: ${lastOrderId || "None placed yet in this session"}
-
 RULES:
-1. Answer concisely using ONLY the live menu, offers, and policies above.
-2. Always format prices in Rupees (₹).
-3. If asked to track an order and an Active Order ID exists, confirm it is being freshly baked and will arrive within 30 minutes.`;
+1. Answer concisely using ONLY the live menu, live orders, offers, and policies above.
+2. Format prices in Rupees (₹).
+3. If asked to track an order, look up the matching Order ID (like BG-1234) in RECENT LIVE ORDERS and report its exact status.`;
 
     try {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${CFG.GROQ_API_KEY}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${CFG.GROQ_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "openai/gpt-oss-20b",
           messages: [{ role: "system", content: systemPrompt }, ...chatHistory],
