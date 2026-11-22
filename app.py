@@ -26,6 +26,7 @@ ops_path = os.path.join(BASE_DIR, "operations.md")
 pol_path = os.path.join(BASE_DIR, "policies.md")
 OPS_TEXT = open(ops_path, "r", encoding="utf-8").read() if os.path.exists(ops_path) else (
     "Active Offers: 20% OFF on all Pizzas (Code: BINGO20). Free delivery within 5 km on orders above ₹299. "
+    "Accepted Payments: UPI, Debit/Credit Cards, Net Banking, and Cash on Delivery. "
     "Store Hours: 11:00 AM - 11:00 PM daily. Phone: (555) 839-7499."
 )
 POL_TEXT = open(pol_path, "r", encoding="utf-8").read() if os.path.exists(pol_path) else (
@@ -135,6 +136,8 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     box-shadow: 0 4px 12px rgba(200,16,46,0.28); text-decoration: none; display: inline-block;
   }
   .btn-primary:hover { background: #A80C24; }
+  .btn-primary:disabled { background: #999; cursor: not-allowed; box-shadow: none; }
+
   .section-wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 44px; }
   .section-title { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 8px; color: #1E1E1E; }
   .section-sub { text-align: center; font-size: 14px; color: #666; margin-bottom: 26px; }
@@ -307,18 +310,18 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     box-shadow: 0 6px 20px rgba(200,16,46,0.35); cursor: pointer; display: none; z-index: 999;
   }
 
-  /* Modals & Tabs */
+  /* Modals & Payment UI */
   .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.58); display: none;
     align-items: center; justify-content: center; z-index: 1000;
   }
   .modal-card {
-    background: #FFF; width: 520px; max-width: 94vw; border-radius: 16px;
-    padding: 24px; max-height: 88vh; overflow-y: auto;
+    background: #FFF; width: 560px; max-width: 95vw; border-radius: 16px;
+    padding: 24px; max-height: 90vh; overflow-y: auto; position: relative;
   }
   .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
   .modal-head h3 { color: #C8102E; font-size: 20px; font-weight: 800; }
-  .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #EEE; padding-bottom: 10px; }
+  .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #EEE; padding-bottom: 10px; flex-wrap: wrap; }
   .tab-btn {
     padding: 7px 14px; border-radius: 20px; border: 1px solid #DDD; background: #FAFAFA;
     font-size: 12.5px; font-weight: 700; cursor: pointer;
@@ -328,12 +331,61 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   .form-group { margin-bottom: 11px; }
   .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #333; }
   .form-group input, .form-group select, .form-group textarea {
-    width: 100%; padding: 9px 12px; border: 1px solid #CCC; border-radius: 8px; font-size: 13px;
+    width: 100%; padding: 9px 12px; border: 1px solid #CCC; border-radius: 8px; font-size: 13px; outline: none;
   }
+  .form-group input:focus, .form-group select:focus { border-color: #C8102E; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
   .qty-btn {
     width: 24px; height: 24px; border-radius: 50%; border: 1px solid #CCC;
     background: #FFF; font-weight: 700; cursor: pointer;
   }
+
+  /* Payment Method Selector Grid */
+  .pay-methods-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-bottom: 14px;
+  }
+  .pay-option {
+    border: 2px solid #E5E5E5; border-radius: 12px; padding: 10px 12px;
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    background: #FAFAFA; transition: 0.15s; font-size: 13px; font-weight: 700;
+  }
+  .pay-option:hover { border-color: #E6B0AA; }
+  .pay-option.active {
+    border-color: #C8102E; background: #FFF5F5; color: #C8102E;
+  }
+  .pay-detail-box {
+    background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px;
+    padding: 14px; margin-bottom: 14px;
+  }
+  .upi-apps-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 12px; }
+  .upi-app-chip {
+    background: #FFF; border: 1px solid #D1D5DB; border-radius: 20px;
+    padding: 5px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .upi-app-chip:hover { border-color: #C8102E; color: #C8102E; }
+
+  .bank-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+  .bank-tile {
+    background: #FFF; border: 1px solid #D1D5DB; border-radius: 8px; padding: 8px 4px;
+    text-align: center; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .bank-tile.active, .bank-tile:hover { border-color: #C8102E; background: #FFF0F0; color: #C8102E; }
+
+  /* Payment Processing Spinner Overlay */
+  .processing-box {
+    text-align: center; padding: 32px 16px;
+  }
+  .spinner {
+    width: 44px; height: 44px; border: 4px solid #F3C2C2; border-top-color: #C8102E;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Status Badges */
+  .badge-paid { background: #EAFAF1; color: #1E8449; border: 1px solid #A9DFBF; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .badge-cod { background: #FEF9E7; color: #B7950B; border: 1px solid #F9E79F; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+
   .toast {
     position: fixed; top: 20px; right: 24px; background: #1E8449; color: #FFF;
     padding: 11px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;
@@ -584,31 +636,153 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   </div>
 </div>
 
-<!-- ==================== MODAL 1: CART & REAL CHECKOUT ==================== -->
+<!-- ==================== MODAL 1: CART & FULL PAYMENT CHECKOUT ==================== -->
 <div class="modal-backdrop" id="cartModal">
   <div class="modal-card">
     <div class="modal-head">
-      <h3>🛒 Your Cart &amp; Checkout</h3>
+      <h3>🛒 Checkout &amp; Payment</h3>
       <button onclick="closeModal('cartModal')" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
     </div>
-    <div id="cartItemsList"></div>
 
-    <div id="checkoutSection" style="display:none; margin-top:14px; border-top:1px solid #EEE; padding-top:12px;">
-      <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <input type="text" id="promoInput" placeholder="Promo code (BINGO20)" style="flex:1;padding:8px;border:1px solid #CCC;border-radius:8px;font-size:13px;" />
-        <button class="btn-add" onclick="applyPromo()">Apply</button>
+    <!-- Processing Spinner View -->
+    <div id="paymentProcessingBox" class="processing-box" style="display:none;">
+      <div class="spinner"></div>
+      <h4 id="processingTitle" style="color:#C8102E;margin-bottom:6px;">Processing Payment...</h4>
+      <p id="processingSub" style="font-size:13px;color:#666;">Connecting securely to payment gateway. Please do not close this window.</p>
+    </div>
+
+    <!-- Main Cart + Delivery + Payment Form -->
+    <div id="cartMainBody">
+      <div id="cartItemsList"></div>
+
+      <div id="checkoutSection" style="display:none; margin-top:14px; border-top:1px solid #EEE; padding-top:12px;">
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <input type="text" id="promoInput" placeholder="Promo code (BINGO20)" style="flex:1;padding:8px;border:1px solid #CCC;border-radius:8px;font-size:13px;" />
+          <button class="btn-add" onclick="applyPromo()">Apply</button>
+        </div>
+        <div id="cartTotalBox" style="font-weight:800; font-size:16px; margin-bottom:14px; color:#1E1E1E;"></div>
+
+        <h4 style="font-size:13.5px; color:#C8102E; margin-bottom:8px;">1. Delivery Details</h4>
+        <div class="form-row-2">
+          <div class="form-group"><label>Customer Name *</label><input id="orderName" placeholder="Your full name" /></div>
+          <div class="form-group"><label>Phone Number *</label><input id="orderPhone" placeholder="10-digit mobile number" /></div>
+        </div>
+        <div class="form-group"><label>Delivery Address *</label><input id="orderAddress" placeholder="House/Flat No, Street, Landmark" /></div>
+
+        <h4 style="font-size:13.5px; color:#C8102E; margin:14px 0 8px;">2. Select Payment Method</h4>
+        <div class="pay-methods-grid">
+          <div class="pay-option active" id="payOpt-upi" onclick="selectPaymentMethod('UPI')">
+            <span style="font-size:20px;">📱</span><span>UPI (GPay / PhonePe)</span>
+          </div>
+          <div class="pay-option" id="payOpt-card" onclick="selectPaymentMethod('Debit / Credit Card')">
+            <span style="font-size:20px;">💳</span><span>Debit / Credit Card</span>
+          </div>
+          <div class="pay-option" id="payOpt-netbanking" onclick="selectPaymentMethod('Net Banking')">
+            <span style="font-size:20px;">🏦</span><span>Net Banking</span>
+          </div>
+          <div class="pay-option" id="payOpt-cod" onclick="selectPaymentMethod('Cash on Delivery')">
+            <span style="font-size:20px;">💵</span><span>Cash on Delivery</span>
+          </div>
+        </div>
+
+        <!-- Payment Sub-Panel A: UPI -->
+        <div class="pay-detail-box" id="payPanel-upi">
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+            <div style="background:#FFF; border:1px solid #DDD; padding:8px; border-radius:10px; text-align:center; min-width:86px;">
+              <div style="font-size:32px; line-height:1;">📲</div>
+              <div style="font-size:10px; font-weight:700; color:#333; margin-top:4px;">Scan UPI QR</div>
+            </div>
+            <div style="font-size:12px; color:#444;">
+              <strong>Pay instantly via any UPI app</strong>
+              <div class="upi-apps-row">
+                <span class="upi-app-chip" onclick="fillSampleUpi('okicici')">GPay</span>
+                <span class="upi-app-chip" onclick="fillSampleUpi('ybl')">PhonePe</span>
+                <span class="upi-app-chip" onclick="fillSampleUpi('paytm')">Paytm</span>
+                <span class="upi-app-chip" onclick="fillSampleUpi('upi')">BHIM</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Enter Your UPI ID *</label>
+            <input id="upiIdInput" placeholder="e.g. yourname@okicici or 9876543210@ybl" />
+          </div>
+        </div>
+
+        <!-- Payment Sub-Panel B: Debit / Credit Card -->
+        <div class="pay-detail-box" id="payPanel-card" style="display:none;">
+          <div class="form-group">
+            <label>Card Number *</label>
+            <input id="cardNumInput" maxlength="19" placeholder="4532 •••• •••• 8890" oninput="formatCardNumber(this)" />
+          </div>
+          <div class="form-group">
+            <label>Name on Card *</label>
+            <input id="cardNameInput" placeholder="e.g. RAHUL SHARMA" />
+          </div>
+          <div class="form-row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Expiry (MM/YY) *</label>
+              <input id="cardExpInput" maxlength="5" placeholder="08/29" oninput="formatCardExpiry(this)" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>CVV *</label>
+              <input id="cardCvvInput" type="password" maxlength="4" placeholder="•••" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Sub-Panel C: Net Banking -->
+        <div class="pay-detail-box" id="payPanel-netbanking" style="display:none;">
+          <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;">Popular Indian Banks</label>
+          <div class="bank-tiles">
+            <div class="bank-tile active" onclick="pickBank('HDFC Bank', this)">HDFC</div>
+            <div class="bank-tile" onclick="pickBank('State Bank of India', this)">SBI</div>
+            <div class="bank-tile" onclick="pickBank('ICICI Bank', this)">ICICI</div>
+            <div class="bank-tile" onclick="pickBank('Axis Bank', this)">Axis</div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Or Select Another Bank *</label>
+            <select id="netBankSelect">
+              <option value="HDFC Bank">HDFC Bank</option>
+              <option value="State Bank of India">State Bank of India (SBI)</option>
+              <option value="ICICI Bank">ICICI Bank</option>
+              <option value="Axis Bank">Axis Bank</option>
+              <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+              <option value="Punjab National Bank">Punjab National Bank (PNB)</option>
+              <option value="Bank of Baroda">Bank of Baroda</option>
+              <option value="Yes Bank">Yes Bank</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Payment Sub-Panel D: Cash on Delivery -->
+        <div class="pay-detail-box" id="payPanel-cod" style="display:none;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:28px;">🛵</span>
+            <div style="font-size:12.5px; color:#333;">
+              <strong>Pay at Doorstep on Delivery</strong>
+              <p style="color:#666; margin-top:2px;">Pay in cash or scan our delivery partner's QR code when your hot pizza arrives.</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="placeOrderBtn" style="width:100%; text-align:center;" onclick="placeOrder()">Pay &amp; Place Order</button>
       </div>
-      <div id="cartTotalBox" style="font-weight:800; font-size:16px; margin-bottom:12px; color:#1E1E1E;"></div>
-
-      <div class="form-group"><label>Customer Name *</label><input id="orderName" placeholder="Your full name" /></div>
-      <div class="form-group"><label>Phone Number *</label><input id="orderPhone" placeholder="10-digit mobile number" /></div>
-      <div class="form-group"><label>Delivery Address *</label><input id="orderAddress" placeholder="House/Flat No, Street, Landmark" /></div>
-      <button class="btn-primary" id="placeOrderBtn" style="width:100%; text-align:center;" onclick="placeOrder()">Confirm &amp; Place Order</button>
     </div>
   </div>
 </div>
 
-<!-- ==================== MODAL 2: LOGIN / REGISTER ==================== -->
+<!-- ==================== MODAL 2: ORDER & PAYMENT RECEIPT ==================== -->
+<div class="modal-backdrop" id="receiptModal">
+  <div class="modal-card" style="text-align:center;">
+    <div style="font-size:48px; margin-bottom:6px;">✅</div>
+    <h3 style="color:#1E8449; font-size:22px; font-weight:800; margin-bottom:4px;">Order Confirmed!</h3>
+    <p style="font-size:13px; color:#666; margin-bottom:16px;">Your pizza is now in our stone-deck oven</p>
+    <div id="receiptDetailsBox" style="background:#F9FAFB; border:1px solid #E5E7EB; border-radius:12px; padding:16px; text-align:left; font-size:13px; line-height:1.8; margin-bottom:16px;"></div>
+    <button class="btn-primary" style="width:100%;" onclick="closeModal('receiptModal')">Done</button>
+  </div>
+</div>
+
+<!-- ==================== MODAL 3: LOGIN / REGISTER ==================== -->
 <div class="modal-backdrop" id="authModal">
   <div class="modal-card">
     <div class="modal-head">
@@ -636,9 +810,9 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   </div>
 </div>
 
-<!-- ==================== MODAL 3: STORE ADMIN (MENU + ORDERS + INBOX) ==================== -->
+<!-- ==================== MODAL 4: STORE ADMIN (MENU + ORDERS + INBOX) ==================== -->
 <div class="modal-backdrop" id="adminModal">
-  <div class="modal-card" style="width:620px;">
+  <div class="modal-card" style="width:650px;">
     <div class="modal-head">
       <h3>⚙️ Store Admin Control Center</h3>
       <button onclick="closeModal('adminModal')" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
@@ -655,7 +829,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     <div id="adminPanelBox" style="display:none;">
       <div class="tab-bar">
         <button class="tab-btn active" id="admTabMenu" onclick="switchAdminTab('menu')">🍕 Menu (SQL)</button>
-        <button class="tab-btn" id="admTabOrders" onclick="switchAdminTab('orders')">🛵 Live Orders</button>
+        <button class="tab-btn" id="admTabOrders" onclick="switchAdminTab('orders')">🛵 Live Orders &amp; Payments</button>
         <button class="tab-btn" id="admTabMsgs" onclick="switchAdminTab('msgs')">📩 Customer Messages</button>
       </div>
 
@@ -694,8 +868,9 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   let menuItems = [];
   let activePage = "home";
   let menuCategory = "All";
-  let cart = []; // [{item, qty}]
+  let cart = [];
   let discountApplied = false;
+  let selectedPaymentMethod = "UPI";
   let currentUser = null;
   let lastOrderId = null;
   let chatHistory = [];
@@ -787,10 +962,15 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       : `<p style="grid-column:1/-1;text-align:center;color:#666;">No pizzas match your filter.</p>`;
   }
 
-  // ==================== 1. CART & REAL ORDER PLACEMENT ====================
+  // ==================== CART & PAYMENT SELECTION ====================
   function parsePrice(str) {
     const num = parseFloat(String(str).replace(/[^0-9.]/g, ""));
     return isNaN(num) ? 0 : num;
+  }
+
+  function getCartFinalTotal() {
+    const subtotal = cart.reduce((sum, e) => sum + parsePrice(e.item.pricing) * e.qty, 0);
+    return discountApplied ? Math.round(subtotal * 0.8) : subtotal;
   }
 
   function updateCartBadge() {
@@ -833,10 +1013,60 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     }
   }
 
+  function selectPaymentMethod(method) {
+    selectedPaymentMethod = method;
+    const map = {
+      "UPI": "upi",
+      "Debit / Credit Card": "card",
+      "Net Banking": "netbanking",
+      "Cash on Delivery": "cod"
+    };
+    Object.values(map).forEach(key => {
+      document.getElementById("payOpt-" + key).classList.remove("active");
+      document.getElementById("payPanel-" + key).style.display = "none";
+    });
+    const activeKey = map[method];
+    document.getElementById("payOpt-" + activeKey).classList.add("active");
+    document.getElementById("payPanel-" + activeKey).style.display = "block";
+    updatePayButtonText();
+  }
+
+  function updatePayButtonText() {
+    const btn = document.getElementById("placeOrderBtn");
+    if (!btn) return;
+    const total = getCartFinalTotal();
+    btn.textContent = (selectedPaymentMethod === "Cash on Delivery")
+      ? `Confirm COD Order (₹${total})`
+      : `Pay ₹${total} via ${selectedPaymentMethod}`;
+  }
+
+  function fillSampleUpi(handle) {
+    const phone = document.getElementById("orderPhone").value.trim() || "9876543210";
+    document.getElementById("upiIdInput").value = `${phone}@${handle}`;
+  }
+
+  function formatCardNumber(input) {
+    const digits = input.value.replace(/\D/g, "").slice(0, 16);
+    input.value = digits.replace(/(.{4})/g, "$1 ").trim();
+  }
+
+  function formatCardExpiry(input) {
+    const digits = input.value.replace(/\D/g, "").slice(0, 4);
+    input.value = digits.length >= 3 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+  }
+
+  function pickBank(bankName, el) {
+    document.querySelectorAll(".bank-tile").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+    document.getElementById("netBankSelect").value = bankName;
+  }
+
   function renderCart() {
     const list = document.getElementById("cartItemsList");
     const checkoutSec = document.getElementById("checkoutSection");
     const totalBox = document.getElementById("cartTotalBox");
+    document.getElementById("paymentProcessingBox").style.display = "none";
+    document.getElementById("cartMainBody").style.display = "block";
 
     if (!cart.length) {
       list.innerHTML = `<p style="color:#666;font-size:13.5px;padding:12px 0;">Your cart is empty. Add pizzas from the Menu to order!</p>`;
@@ -866,10 +1096,38 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
         </div>`;
     }).join("");
 
-    const finalTotal = discountApplied ? Math.round(subtotal * 0.8) : subtotal;
+    const finalTotal = getCartFinalTotal();
     totalBox.innerHTML = discountApplied
       ? `Subtotal: ₹${subtotal} → <span style="color:#1E8449;">20% OFF Total: ₹${finalTotal}</span>`
       : `Grand Total: ₹${finalTotal}`;
+    updatePayButtonText();
+  }
+
+  function validatePaymentInputs() {
+    if (selectedPaymentMethod === "UPI") {
+      const upi = document.getElementById("upiIdInput").value.trim();
+      if (!upi || !upi.includes("@")) {
+        showToast("Please enter a valid UPI ID (e.g., name@okicici).", true);
+        return null;
+      }
+      return `UPI (${upi})`;
+    }
+    if (selectedPaymentMethod === "Debit / Credit Card") {
+      const num = document.getElementById("cardNumInput").value.replace(/\s/g, "");
+      const holder = document.getElementById("cardNameInput").value.trim();
+      const exp = document.getElementById("cardExpInput").value.trim();
+      const cvv = document.getElementById("cardCvvInput").value.trim();
+      if (num.length < 13 || !holder || exp.length < 4 || cvv.length < 3) {
+        showToast("Please enter complete Card Number, Name, Expiry, and CVV.", true);
+        return null;
+      }
+      return `Card (•••• ${num.slice(-4)})`;
+    }
+    if (selectedPaymentMethod === "Net Banking") {
+      const bank = document.getElementById("netBankSelect").value;
+      return `Net Banking (${bank})`;
+    }
+    return "Cash on Delivery";
   }
 
   async function placeOrder() {
@@ -882,45 +1140,71 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       return;
     }
 
-    const subtotal = cart.reduce((sum, e) => sum + parsePrice(e.item.pricing) * e.qty, 0);
-    const finalTotal = discountApplied ? Math.round(subtotal * 0.8) : subtotal;
+    const paymentLabel = validatePaymentInputs();
+    if (!paymentLabel) return;
+
+    const finalTotal = getCartFinalTotal();
     const itemsSummary = cart.map(e => `${e.qty}x ${e.item.name}`).join(", ");
     const orderCode = "BG-" + Math.floor(1000 + Math.random() * 9000);
+    const isCOD = (selectedPaymentMethod === "Cash on Delivery");
+    const txnId = isCOD
+      ? "COD-" + Math.floor(100000 + Math.random() * 900000)
+      : "TXN-" + Date.now().toString().slice(-8);
+    const paymentStatus = isCOD ? "Pending (COD)" : "Paid";
 
-    const btn = document.getElementById("placeOrderBtn");
-    btn.disabled = true; btn.textContent = "Placing Order...";
+    // Show interactive payment processing animation
+    document.getElementById("cartMainBody").style.display = "none";
+    document.getElementById("paymentProcessingBox").style.display = "block";
+    document.getElementById("processingTitle").textContent = isCOD
+      ? "Confirming Cash on Delivery Order..."
+      : `Authorizing ₹${finalTotal} via ${selectedPaymentMethod}...`;
 
-    try {
-      const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/orders`, {
-        method: "POST",
-        headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
-        body: JSON.stringify({
-          order_code: orderCode,
-          customer_name: cName,
-          customer_phone: cPhone,
-          delivery_address: cAddr,
-          items_summary: itemsSummary,
-          total_amount: finalTotal,
-          status: "Preparing in Oven"
-        })
-      });
-      if (res.ok) {
-        lastOrderId = orderCode;
-        cart = [];
-        discountApplied = false;
-        updateCartBadge();
-        closeModal("cartModal");
-        showToast(`Order ${orderCode} placed! Track it anytime in the chatbot.`);
-        appendChat("bot", `🎉 Order **${orderCode}** confirmed for ${cName}! Total: ₹${finalTotal}. Status: *Preparing in Oven*.`);
-      } else {
-        showToast("Could not save order. Ensure 'orders' table SQL was executed.", true);
-      }
-    } finally {
-      btn.disabled = false; btn.textContent = "Confirm & Place Order";
+    await new Promise(r => setTimeout(r, isCOD ? 700 : 1500));
+
+    const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/orders`, {
+      method: "POST",
+      headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+      body: JSON.stringify({
+        order_code: orderCode,
+        customer_name: cName,
+        customer_phone: cPhone,
+        delivery_address: cAddr,
+        items_summary: itemsSummary,
+        total_amount: finalTotal,
+        status: "Preparing in Oven",
+        payment_method: paymentLabel,
+        payment_status: paymentStatus,
+        transaction_id: txnId
+      })
+    });
+
+    if (res.ok) {
+      lastOrderId = orderCode;
+      cart = [];
+      discountApplied = false;
+      updateCartBadge();
+      closeModal("cartModal");
+
+      // Show Digital Payment Receipt Modal
+      document.getElementById("receiptDetailsBox").innerHTML = `
+        <div><strong>Order ID:</strong> ${orderCode}</div>
+        <div><strong>Transaction ID:</strong> ${txnId}</div>
+        <div><strong>Payment Method:</strong> ${paymentLabel}</div>
+        <div><strong>Payment Status:</strong> <span class="${isCOD ? 'badge-cod' : 'badge-paid'}">${paymentStatus}</span></div>
+        <div><strong>Amount:</strong> ₹${finalTotal}</div>
+        <div><strong>Items:</strong> ${itemsSummary}</div>
+        <div><strong>Deliver To:</strong> ${cName} (${cAddr})</div>
+      `;
+      openModal("receiptModal");
+      appendChat("bot", `🎉 Order **${orderCode}** confirmed! Paid ₹${finalTotal} via **${paymentLabel}** (${paymentStatus}). Txn ID: \`${txnId}\`.`);
+    } else {
+      document.getElementById("paymentProcessingBox").style.display = "none";
+      document.getElementById("cartMainBody").style.display = "block";
+      showToast("Database error: Please run the Step 1 SQL to add payment columns.", true);
     }
   }
 
-  // ==================== 2. LOGIN / REGISTER (SUPABASE CUSTOMERS) ====================
+  // ==================== LOGIN / REGISTER ====================
   function switchAuthTab(mode) {
     document.getElementById("tabLoginBtn").classList.toggle("active", mode === "login");
     document.getElementById("tabRegBtn").classList.toggle("active", mode === "register");
@@ -948,7 +1232,6 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     const email = document.getElementById("regEmail").value.trim().toLowerCase();
     const phone = document.getElementById("regPhone").value.trim();
     const password = document.getElementById("regPassword").value;
-
     if (!full_name || !email || !phone || !password) {
       showToast("All registration fields are required.", true);
       return;
@@ -959,7 +1242,6 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       headers: { ...SB_HEADERS, "Prefer": "return=representation" },
       body: JSON.stringify({ full_name, email, phone, password })
     });
-
     if (res.ok) {
       const rows = await res.json();
       currentUser = rows[0] || { full_name, email, phone };
@@ -967,7 +1249,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       closeModal("authModal");
       showToast(`Welcome ${full_name}! Account created.`);
     } else {
-      showToast("Registration failed (email may already exist or check SQL table).", true);
+      showToast("Registration failed (email may already exist).", true);
     }
   }
 
@@ -978,7 +1260,6 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       showToast("Enter email and password.", true);
       return;
     }
-
     const res = await fetch(
       `${CFG.SUPABASE_URL}/rest/v1/customers?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(password)}&select=*`,
       { headers: SB_HEADERS }
@@ -1000,7 +1281,7 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     showToast("Logged out.");
   }
 
-  // ==================== 3. CONTACT -> SEND MESSAGE ====================
+  // ==================== CONTACT -> SEND MESSAGE ====================
   async function submitContactForm() {
     const sender_name = document.getElementById("contactName").value.trim();
     const contact_info = document.getElementById("contactEmail").value.trim();
@@ -1009,10 +1290,8 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
       showToast("Please fill in Name, Phone/Email, and Message.", true);
       return;
     }
-
     const btn = document.getElementById("sendMsgBtn");
     btn.disabled = true; btn.textContent = "Sending...";
-
     try {
       const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/contact_messages`, {
         method: "POST",
@@ -1023,14 +1302,14 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
         document.getElementById("contactMsg").value = "";
         showToast("Message sent! Viewable in Store Admin → Customer Messages.");
       } else {
-        showToast("Failed to send. Ensure 'contact_messages' SQL table exists.", true);
+        showToast("Failed to send message.", true);
       }
     } finally {
       btn.disabled = false; btn.textContent = "Send Message";
     }
   }
 
-  // ==================== 4. STORE ADMIN (MENU + ORDERS + INBOX) ====================
+  // ==================== STORE ADMIN ====================
   function openModal(id) {
     if (id === "cartModal") renderCart();
     document.getElementById(id).style.display = "flex";
@@ -1102,27 +1381,36 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
   async function loadAdminOrders() {
     const box = document.getElementById("adminOrdersList");
     const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/orders?select=*&order=id.desc`, { headers: SB_HEADERS });
-    if (!res.ok) { box.innerHTML = "<p>Run Step 1 SQL to enable orders.</p>"; return; }
+    if (!res.ok) { box.innerHTML = "<p>Could not load orders.</p>"; return; }
     const orders = await res.json();
     if (!orders.length) { box.innerHTML = "<p style='font-size:13px;color:#666;'>No orders placed yet.</p>"; return; }
 
-    box.innerHTML = orders.map(o => `
-      <div style="border:1px solid #EEE;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12.5px;">
-        <div style="display:flex;justify-content:space-between;">
+    box.innerHTML = orders.map(o => {
+      const isPaid = (o.payment_status === "Paid");
+      return `
+      <div style="border:1px solid #EEE;border-radius:10px;padding:12px;margin-bottom:10px;font-size:12.5px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
           <strong>${o.order_code} — ${o.customer_name} (${o.customer_phone})</strong>
-          <span style="color:#C8102E;font-weight:800;">₹${o.total_amount}</span>
+          <span style="color:#C8102E;font-weight:800;font-size:14px;">₹${o.total_amount}</span>
+        </div>
+        <div style="margin:5px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span class="${isPaid ? 'badge-paid' : 'badge-cod'}">${o.payment_status || 'Pending'}</span>
+          <span style="font-weight:600;color:#333;">${o.payment_method || 'Cash on Delivery'}</span>
+          ${o.transaction_id ? `<span style="color:#777;font-size:11px;">(${o.transaction_id})</span>` : ''}
         </div>
         <div style="color:#444;margin:4px 0;">Items: ${o.items_summary}</div>
-        <div style="color:#666;margin-bottom:6px;">Address: ${o.delivery_address}</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span>Status:</span>
+        <div style="color:#666;margin-bottom:8px;">Address: ${o.delivery_address}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span>Order Status:</span>
           <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid #CCC;font-size:12px;">
             <option ${o.status==='Preparing in Oven'?'selected':''}>Preparing in Oven</option>
             <option ${o.status==='Out for Delivery'?'selected':''}>Out for Delivery</option>
             <option ${o.status==='Delivered'?'selected':''}>Delivered</option>
           </select>
+          ${!isPaid ? `<button class="btn-add" style="background:#1E8449;" onclick="markOrderPaid(${o.id})">Mark COD Paid</button>` : ''}
         </div>
-      </div>`).join("");
+      </div>`;
+    }).join("");
   }
 
   async function updateOrderStatus(orderId, newStatus) {
@@ -1134,10 +1422,20 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
     showToast(`Order status updated to: ${newStatus}`);
   }
 
+  async function markOrderPaid(orderId) {
+    await fetch(`${CFG.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
+      method: "PATCH",
+      headers: SB_HEADERS,
+      body: JSON.stringify({ payment_status: "Paid" })
+    });
+    loadAdminOrders();
+    showToast("Payment marked as Paid!");
+  }
+
   async function loadAdminMessages() {
     const box = document.getElementById("adminMsgsList");
     const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/contact_messages?select=*&order=id.desc`, { headers: SB_HEADERS });
-    if (!res.ok) { box.innerHTML = "<p>Run Step 1 SQL to enable messages.</p>"; return; }
+    if (!res.ok) { box.innerHTML = "<p>Could not load messages.</p>"; return; }
     const msgs = await res.json();
     if (!msgs.length) { box.innerHTML = "<p style='font-size:13px;color:#666;'>No customer messages yet.</p>"; return; }
 
@@ -1180,11 +1478,11 @@ HTML_WEBSITE = r"""<!DOCTYPE html>
 
     const [freshMenu, ordersRes] = await Promise.all([
       fetchLiveMenu(),
-      fetch(`${CFG.SUPABASE_URL}/rest/v1/orders?select=order_code,customer_name,items_summary,total_amount,status&order=id.desc&limit=10`, { headers: SB_HEADERS })
+      fetch(`${CFG.SUPABASE_URL}/rest/v1/orders?select=order_code,customer_name,items_summary,total_amount,status,payment_method,payment_status,transaction_id&order=id.desc&limit=10`, { headers: SB_HEADERS })
     ]);
     const recentOrders = ordersRes.ok ? await ordersRes.json() : [];
     const menuContext = freshMenu.map(i => `- ${i.name} (${i.category}): ${i.pricing} — ${i.description || ''}`).join("\n");
-    const ordersContext = recentOrders.map(o => `- ${o.order_code} (${o.customer_name}): ${o.items_summary} | ₹${o.total_amount} | Status: ${o.status}`).join("\n");
+    const ordersContext = recentOrders.map(o => `- ${o.order_code} (${o.customer_name}): ${o.items_summary} | ₹${o.total_amount} | Payment: ${o.payment_method} (${o.payment_status}, ${o.transaction_id || ''}) | Delivery Status: ${o.status}`).join("\n");
 
     const systemPrompt = `You are the friendly AI Assistant for Bingo & Gogo Pizza Shop.
 LIVE MENU FROM SUPABASE:
@@ -1203,7 +1501,7 @@ ${CFG.POL_TEXT}
 RULES:
 1. Answer concisely using ONLY the live menu, live orders, offers, and policies above.
 2. Format prices in Rupees (₹).
-3. If asked to track an order, look up the matching Order ID (like BG-1234) in RECENT LIVE ORDERS and report its exact status.`;
+3. If asked to track an order, look up the matching Order ID in RECENT LIVE ORDERS and share both its delivery status and payment status.`;
 
     try {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
